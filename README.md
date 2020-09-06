@@ -21,7 +21,7 @@ automating the rules I followed while hand drawing the GIF.
 
 ## View of progress
 
-! [Progress Image] (Progress.png)
+![Progress Image] (Progress.png)
 
 ## Latest Build
 Still In progress
