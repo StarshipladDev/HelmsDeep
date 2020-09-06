@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,13 +24,127 @@ namespace WindowsFormsApp1
         }
         public static void FillCells()
         {
-                Random rand = new Random();
-                for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
+            Random rand = new Random();
+            //The height of the Top of the wall
+            int height = 20;
+            int[] wallHeight = new int[height];
+            int[] cityHeight = new int[height];
+            for(int i=0; i< height; i++){
+                if (i == 0){
+                    wallHeight[i] = 7;
+                    cityHeight[i] = 2;
+                }
+                else{
+                    wallHeight[i] = wallHeight[i-1];
+                    cityHeight[i] = cityHeight[i-1];
+                }
+                int wallHeightChange = rand.Next(3);
+                int cityHeightChange = rand.Next(3);
+                if (wallHeight[i]>10)
                 {
+                    wallHeightChange = rand.Next(2) ;
+                }
+                if (wallHeight[i] < 5)
+                {
+                    wallHeightChange = rand.Next(2)+1;
+                }
+                if (cityHeight[i] > 4) {
+
+                    cityHeightChange = rand.Next(2);
+
+                }
+                if(cityHeight[i]< 2)
+                {
+                    cityHeightChange = rand.Next(2)+1;
+                }
+                if (cityHeightChange == 0)
+                {
+                    cityHeight[i]--;
+                }
+                if (cityHeightChange == 2)
+                {
+                    cityHeight[i]++;
+                }
+                if (wallHeightChange == 0)
+                {
+                    wallHeight[i]--;
+                }
+                if (wallHeightChange == 2)
+                {
+                    wallHeight[i]++;
+                }
+                Debug.WriteLine("Wall:" + wallHeight[i] + ", city:" + cityHeight[i]);
+            }
+            //X axis
+            for (int i = 0; i < Globals.siegeCells.GetLength(0); i++){
+                //Y axis
                 for (int f = 0; f < Globals.siegeCells.GetLength(0); f++)
                 {
                     Globals.siegeCells[i, f] = new SiegeFunctions.SiegeCell(SiegeFunctions.Direction.None, SiegeFunctions.CellTypes.Empty);
+                    if (wallHeight[i] == f)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
+                        if (rand.Next(5) == 0)
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Rohan);
+                        }
+                    }
+                    if (wallHeight[i]+1 == f || wallHeight[i]+2 == f)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Wall);
+                    }
+                    if (cityHeight[i]> f)
+                    {
+
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Night);
+                    }
+                    if (cityHeight[i] <= f && wallHeight[i] > f)
+                    {
+
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.CityProper);
+                        if (rand.Next(30) == 0 && f< wallHeight[i]-2)
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
+                        }
+                    }
+                    if (f > wallHeight[i]+2)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
+                        if(Globals.siegeCells[i, f-1].GetCellType()== SiegeFunctions.CellTypes.LadderStart)
+                        {
+
+                            Globals.siegeCells[i, f-1].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                        }
+                        bool placeSoldier = false;
+                        if (i > 4 && i < Globals.siegeCells.GetLength(0))
+                        {
+                            placeSoldier = true;
+                        }
+                        else if (rand.Next(5) > 1)
+                        {
+                            placeSoldier = true;
+                        }
+                        if (placeSoldier) { 
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Urkhai);
+                            if (rand.Next(30) ==0)
+                            {
+                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.UrkhaiElite);
+                            }
+                            if (rand.Next(30) == 0)
+                            {
+                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.LadderStart);
+                            }
+                            if (rand.Next(30) == 0)
+                            {
+                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
+                            }
+                        }
+                    }
+
+                    /*
                     switch (rand.Next(8))
+
                     {
                         case (1 | 2 | 3):
                             Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Urkhai);
@@ -41,7 +156,10 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
+                    */
+                    Debug.Write(Globals.siegeCells[i, f].GetCellType().ToString());
                 }
+                Debug.Write("\n");
         }
         }
         public static void HelmsDeepButton(Form1 f)
@@ -50,25 +168,102 @@ namespace WindowsFormsApp1
             DisplayCells(f);
 
         }
+        public static bool GetNearbyCells(int x ,int y, SiegeFunctions.CellTypes search)
+        {
+            if (x > 0)
+            {
+
+                if (Globals.siegeCells[x - 1, y].GetCellType() == search)
+                {
+                    return true;
+                }
+                if (y>0&& Globals.siegeCells[x - 1, y].GetCellType() == search)
+                {
+                    return true;
+                }
+                if (y < Globals.siegeCells.GetLength(0)-1&& Globals.siegeCells[x - 1, y+1].GetCellType() == search)
+                {
+                    return true;
+                }
+            }
+            if (y > 0 && Globals.siegeCells[x, y-1].GetCellType() == search)
+            {
+                return true;
+            }
+            if (y < Globals.siegeCells.GetLength(0)-1 && Globals.siegeCells[x, y+1].GetCellType() == search)
+            {
+                return true;
+            }
+            if (x < Globals.siegeCells.GetLength(0)-1)
+            {
+
+                if (Globals.siegeCells[x + 1, y].GetCellType() == search)
+                {
+                    return true;
+                }
+                if (y > 0 && Globals.siegeCells[x + 1, y-1].GetCellType() == search)
+                {
+                    return true;
+                }
+                if (y < Globals.siegeCells.GetLength(0)-1 && Globals.siegeCells[x + 1, y+1].GetCellType() == search)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static void DisplayCells(Form1 f)
         {
             Form1 form1 = f;
             SolidBrush brush  = new SolidBrush(Color.Transparent);
             Graphics g = f.CreateGraphics();
-            for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
+            for (int r = 0; r < Globals.siegeCells.GetLength(0); r++)
             {
-                for (int r = 0; r < Globals.siegeCells.GetLength(0); r++)
+                for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
                 {
-                    switch(Globals.siegeCells[i, r].GetCellType()){
-                        case (SiegeFunctions.CellTypes.Empty):
-                            brush.Color = Color.LightCoral;
+                    switch(Globals.siegeCells[r, i].GetCellType()){
+                        case (SiegeFunctions.CellTypes.Ground):
+                            brush.Color = Color.FromArgb(255,178,123,89);
                             break;
-                        case (SiegeFunctions.CellTypes.Urkhai):
-                            brush.Color = Color.Black;
+                        case (SiegeFunctions.CellTypes.Wall):
+                            brush.Color = Color.FromArgb(255, 128, 128, 128);
+                            break;
+                        case (SiegeFunctions.CellTypes.WallTop):
+                            brush.Color = Color.FromArgb(255, 89, 89, 89);
+                            break;
+                        case (SiegeFunctions.CellTypes.Night):
+                            brush.Color = Color.FromArgb(255, 0, 0, 0);
+                            break;
+                        case (SiegeFunctions.CellTypes.CityProper):
+                            brush.Color = Color.FromArgb(255, 64, 64, 64);
                             break;
                         case (SiegeFunctions.CellTypes.Rohan):
-                            brush.Color = Color.DarkGreen;
+
+                            brush.Color = Color.FromArgb(255, 165, 255, 127);
                             break;
+                        case (SiegeFunctions.CellTypes.Torch):
+
+                            brush.Color = Color.FromArgb(255, 255, 216, 0);
+                            break;
+                        case (SiegeFunctions.CellTypes.Urkhai):
+
+                            brush.Color = Color.FromArgb(255, 48, 48, 48);
+                            if(GetNearbyCells(r,i, SiegeFunctions.CellTypes.Torch))
+                            {
+
+                                brush.Color = Color.FromArgb(255, 71, 71, 71);
+                            }
+                            break;
+                        case (SiegeFunctions.CellTypes.UrkhaiElite):
+
+                            brush.Color = Color.FromArgb(255, 192, 192, 192);
+                            break;
+                       case (SiegeFunctions.CellTypes.Ladder):
+                             brush.Color = Color.FromArgb(255, 127, 63, 63);
+                            break;
+                        default:
+                                brush.Color = Color.FromArgb(165, 255, 0, 0);
+                                break;
 
 
                     }

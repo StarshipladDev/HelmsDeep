@@ -15,12 +15,15 @@ namespace WindowsFormsApp1
             Urkhai,
             Torch,
             Wall,
+            LadderStart,
             Grate,
             Rohan,
             CityProper,
             Empty,
             WallTop,
-            UrkhaiElite
+            UrkhaiElite,
+            Night,
+            Ground
 
 
         }

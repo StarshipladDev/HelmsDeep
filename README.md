@@ -2,38 +2,49 @@
 
 ![Helms Deep](SalesPitch.PNG)
 
+This is a short C# project designed to replicate a handdrawn micro .GIF animated image by
+automating the rules I followed while hand drawing the GIF.
+
+
 ## Notes/Know Bugs:
 
-> Still In progress
+> 'Night' Tiles may go down so far there is no 'City' tiles between 'Top Wall' Tiles and 'Night'
 
 ## Features(Planned In Brackets)
 
-> Still In progress
+> (Aniamted .GIF file)
+
+> (Export .GIF file of project)
+
+> Automates the hand-drawing process used to draw https://twitter.com/StarshipladDevp/status/1300752966299734017
+
 
 ## View of progress
 
-
-### Still In progress
-
+! [Progress Image] (Progress.PNG)
 
 ## Latest Build
 Still In progress
 
 ## Latest Update
 
-01/09/2020 - Inital upload
+0/09/2020 - Base Draw
 
 > Updated README
 
->Base 'Form1' App that draws base grid on button press
+> Added several new Tile types
+
+> Added Lighting effects around 'Torch' tiles
+
+>Redrawing Index image now matches the style of handrawn
 
 ## Next Build
 
-Week ending 06/09/2020
+Week ending 20/09/2020
 
-* All Cellgrid types drawn to grid
+* Add button that animates from the index image
 
-* Cellgrids Drawn followign rules
+* Add 'combat' automation and ladder scaling
 
 * Help button for .GIF example
 
