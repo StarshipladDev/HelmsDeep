@@ -4,7 +4,7 @@
 
 This is a short C# project designed to replicate a handdrawn micro .GIF animated image by
 automating the rules I followed while hand drawing the GIF.
-![AnimatedGIF](HelmsDeep.GIF)
+![AnimatedGIF](HelmsDeep.gif)
 
 
 ## Notes/Know Bugs:
