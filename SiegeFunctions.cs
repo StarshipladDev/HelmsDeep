@@ -37,7 +37,7 @@ namespace WindowsFormsApp1
         }
         public class SiegeCell
         {
-            
+            public bool wounded = false;
             CellTypes cellType;
             Direction lastDirection;
             Direction nextDirection;

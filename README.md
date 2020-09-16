@@ -31,24 +31,31 @@ Still In progress
 
 ## Latest Update
 
-13/09/2020 - Animation 0.5
-
-> Add changes.txt file to log changes
-> WorkerFUnctions.cs -> Add 'SetupSiegeCellAnimation' Method to input next animation details
-> Globals.cs -> Move wall and cityheight variables to 'Globals.cs' to be refrenced in animation code
-> WorkerFUnctions.cs -> Add 'RunAnimation' Method to change siegecells array as per 'SetupSiegeCellAnimation'
-> WorkerFUnctions.cs -> Modify HemlsDeepButton function to run the above two animation commands 20 times, with a 1.5 second break between
-> Globals.cs -> Add utility function 'PrintSigeCells' to print each cell's direction and type
+15/09/2019 - Unit Handling
+	WorkerFunctions.cs -> Refractor 'FillCells' component that set what cell would be what type to a 'setCell' funtion.
+	WorkerFunctions.cs -> Modify 'RunAnimation' so it spawns new units at the end and completes new ladders from last cycle, for aesthetic.
+	WorkerFunctions.cs -> Modify 'SetCell' so it spawns new units only 4 tiles away from the bottom of the wall, for aesthetic.
+	WorkerFunctions.cs -> Modify 'DisplayCells' so that after drawing, it sprays grey lines on 'Urkahai' & 'Rohan' tiles. This is for aesthetic.
+		This required passing a Random instance to 'DislayCells'
+	WorkerFunctions.cs -> Modify 'SetCell' so wall top fills up or down depending on leftmost walltop, to bulk up walls
+	WorkerFunctions.cs -> Modify 'SetupSiegeAnimation' so there is a 33% change Rohan or Urkahai units touching will be 'wounded'.
+		This method now also resets wounded on each loop, so a unit will only be wounded for 1 cycle. This required making
+		'SetupSiegeAnimation' take a 'Random' instacne.
+	SiegeFunctions.cs -> Modify 'SiegeCell' to have a 'wounded' bool. WorkerFunctions.cs 'DispalyCell' will draw as red if true.
+	WorkerFunctions.cs -> Refractor 'RunAnimations' component that made it so area below the unit that has moved on will be reset, 
+		regardless of direction rather than only on 'UP' movements. Added handling for 'LEFT' and 'RIGHT' movements
+	WorkerFunctions.cs -> Modify 'SetupSiegeAnimation' so 'Urkahai' or 'UrkahaiElites' will move left or right if on the wall.
+		This is for aesthetics
 
 ## Next Build
 
-Week ending 20/09/2020
+Week ending 11/10/2020 -Release 1.0
 
-* Add button that animates from the index image
+* Add casulty/unit removal after enough 'wounds'
 
-* Add 'combat' automation and ladder scaling
+* Improve the Background City, add bomb handling
 
-* GIF Output(Maybe release after)
+* GIF Output
 
 * Help button for .GIF example
 
@@ -64,5 +71,9 @@ I plan on this project improving my skills in the following:
 >Pixel Art and Animation
 
 ## Installing and Compiling:
+* NOTE * Windows machine only
 
-Work in progress
+1) UnZIP the 'Executable' ZIP file after downloading this repo
+2) Double click the 'HelmsDeep.exe' file in the extracted folder
+3) Hit 'Start Helm's Deep Siege' To begin animating in the window
+![HelpImage](Help.PNG)

@@ -23,6 +23,84 @@ namespace WindowsFormsApp1
                 }
             }
         }
+        public static void SetCell(int i, int f, Random rand)
+        {
+            int[] wallHeight = Globals.wallHeight;
+            int[] cityHeight = Globals.cityHeight;
+
+            if (wallHeight[i] == f)
+            {
+                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
+                if (rand.Next(5) == 0)
+                {
+                    Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Rohan);
+                }
+                if (i > 0)
+                {
+                    if (wallHeight[i - 1] == wallHeight[i] - 1 || wallHeight[i - 1] == wallHeight[i]+1)
+                    {
+                        Globals.siegeCells[i - 1, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
+                    }
+
+                }
+            }
+            if (wallHeight[i] + 1 == f || wallHeight[i] + 2 == f)
+            {
+                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Wall);
+            }
+            if (cityHeight[i] > f)
+            {
+
+                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Night);
+            }
+            if (cityHeight[i] <= f && wallHeight[i] > f)
+            {
+
+                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.CityProper);
+                if (rand.Next(30) == 0 && f < wallHeight[i] - 2)
+                {
+                    Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
+                }
+            }
+            if (f > wallHeight[i] + 2)
+            {
+                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
+            }
+            if (f > wallHeight[i] + 4) { 
+
+                bool placeSoldier = false;
+                if (Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.LadderStart)
+                {
+
+                    Globals.siegeCells[i, f - 1].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                    Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                }
+                else if (i > 4 && i < Globals.siegeCells.GetLength(0) - 3)
+                {
+                    placeSoldier = true;
+                }
+                else if (rand.Next(5) > 1)
+                {
+                    placeSoldier = true;
+                }
+                if (placeSoldier)
+                {
+                    Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Urkhai);
+                    if (rand.Next(30) == 0)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.UrkhaiElite);
+                    }
+                    if (rand.Next(30) == 0)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.LadderStart);
+                    }
+                    if (rand.Next(30) == 0)
+                    {
+                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
+                    }
+                }
+            }
+        }
         public static void FillCells()
         {
             Random rand = new Random();
@@ -82,67 +160,7 @@ namespace WindowsFormsApp1
                 for (int f = 0; f < Globals.siegeCells.GetLength(0); f++)
                 {
                     Globals.siegeCells[i, f] = new SiegeFunctions.SiegeCell(SiegeFunctions.Direction.None, SiegeFunctions.CellTypes.Empty);
-                    if (wallHeight[i] == f)
-                    {
-                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
-                        if (rand.Next(5) == 0)
-                        {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Rohan);
-                        }
-                    }
-                    if (wallHeight[i] + 1 == f || wallHeight[i] + 2 == f)
-                    {
-                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Wall);
-                    }
-                    if (cityHeight[i] > f)
-                    {
-
-                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Night);
-                    }
-                    if (cityHeight[i] <= f && wallHeight[i] > f)
-                    {
-
-                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.CityProper);
-                        if (rand.Next(30) == 0 && f < wallHeight[i] - 2)
-                        {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
-                        }
-                    }
-                    if (f > wallHeight[i] + 2)
-                    {
-                        Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
-
-                        bool placeSoldier = false;
-                        if (Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.LadderStart)
-                        {
-
-                            Globals.siegeCells[i, f - 1].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                        }
-                        else if (i > 4 && i < Globals.siegeCells.GetLength(0)-3)
-                        {
-                            placeSoldier = true;
-                        }
-                        else if (rand.Next(5) > 1)
-                        {
-                            placeSoldier = true;
-                        }
-                        if (placeSoldier) {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Urkhai);
-                            if (rand.Next(30) == 0)
-                            {
-                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.UrkhaiElite);
-                            }
-                            if (rand.Next(30) == 0)
-                            {
-                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.LadderStart);
-                            }
-                            if (rand.Next(30) == 0)
-                            {
-                                Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Torch);
-                            }
-                        }
-                    }
+                    SetCell(i, f, rand);
 
                     /*
                     switch (rand.Next(8))
@@ -166,19 +184,21 @@ namespace WindowsFormsApp1
         }
         public static void HelmsDeepButton(Form1 f)
         {
+
+            Random rand = new Random();
             FillCells();
-            DisplayCells(f);
-            for(int i=0; i<20; i++)
+            DisplayCells(f,rand);
+            for(int i=0; i<40; i++)
             {
                 Debug.WriteLine(" I is "+i);
                 Globals.PrintCells();
-                SetUpSiegeAnimation();
+                SetUpSiegeAnimation(rand);
                 RunAnimation();
-                DisplayCells(f);
+                DisplayCells(f,rand);
 
                 Debug.WriteLine(" I is still" + i);
                 Globals.PrintCells();
-                Thread.Sleep(1500);
+                Thread.Sleep(1000);
             }
 
         }
@@ -232,11 +252,28 @@ namespace WindowsFormsApp1
             {
                 for (int f = 1; f < Globals.siegeCells.GetLength(1); f++)
                 {
-                    if(Globals.siegeCells[i, f].GetNextDirection()==SiegeFunctions.Direction.Up)
+                    if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Up)
                     {
 
                         Globals.siegeCells[i, f - 1].SetCellType(Globals.siegeCells[i, f].GetCellType());
-                        if (f > Globals.wallHeight[i]+2)
+                        
+                    }
+                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Left)
+                    {
+
+                        Globals.siegeCells[i-1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
+
+                    }
+                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Right)
+                    {
+
+                        Globals.siegeCells[i+1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
+
+                    }
+                    //RESET AREA BELOW
+                    if(Globals.siegeCells[i, f].GetNextDirection() != SiegeFunctions.Direction.None)
+                    {
+                        if (f > Globals.wallHeight[i] + 2)
                         {
                             Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
                         }
@@ -244,28 +281,80 @@ namespace WindowsFormsApp1
                         {
                             Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
                         }
+                        else if (f <= Globals.wallHeight[i])
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
+                        }
+                    }
+                    
+                }
+            }
+            int newUnitCounter=0;
+            Random rand = new Random();
+            for (int i = 0; i < Globals.height - 1; i++)
+            {
+                //If unit ahead is Ladder start, make that ladder and make current unit ladder
+                if (Globals.siegeCells[i, Globals.height - 1].GetCellType() == SiegeFunctions.CellTypes.LadderStart)
+                {
+                    Globals.siegeCells[i, Globals.height - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                    Globals.siegeCells[i, Globals.height-1].SetCellType(SiegeFunctions.CellTypes.Ladder);
+
+                }
+                // Otherwise replace 3 ground tiles with new units
+                else if (newUnitCounter<5 && Globals.siegeCells[i, Globals.height-1].GetCellType()==(SiegeFunctions.CellTypes.Ground))
+                {
+                    if (rand.Next(2) > 0)
+                    {
+                        SetCell(i, Globals.height-1,rand);
+                        newUnitCounter++;
                     }
                 }
             }
         }
-        public static void SetUpSiegeAnimation(){
+        public static void SetUpSiegeAnimation(Random rand){
             for(int i=0; i< Globals.siegeCells.GetLength(1); i++)
             {
                 for (int f = 1; f < Globals.siegeCells.GetLength(1); f++)
                 {
                     //Default-> set direction as none
                     Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.None);
+                    Globals.siegeCells[i, f].wounded = false;
                     //Urkhai , Elites and Torches
                     if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Urkhai || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Torch || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.UrkhaiElite)
                     {
-                        if (f > Globals.wallHeight[i] + 3 && (Globals.siegeCells[i,f-1].GetNextDirection()== SiegeFunctions.Direction.Up || Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ground))
+                        //If touching Rohan Soldier, set one as wounded
+                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Rohan))
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                Globals.siegeCells[i, f].wounded = true;
+                            }
+                        }
+
+                        //If below Wallbase, and cell in front is free or will be free, move foward
+                        else if (f > Globals.wallHeight[i] + 3 && (Globals.siegeCells[i,f-1].GetNextDirection()== SiegeFunctions.Direction.Up || Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ground))
                         {
                             Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
                         }
                         //Move up if ladder on wall above
-                        else if (f > Globals.wallHeight[i] && (Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ladder || Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.WallTop))
+                        else if (f >= Globals.wallHeight[i] && (Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ladder || Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.WallTop))
                         {
                             Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
+                        }
+                        //If on wall and Left or Right Wall free && WallTop or Ground, move there
+                        else if (rand.Next(2) > 0)
+                        {
+                            if ((i > 1 && (( Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop)|| (Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground))))
+                            {
+                                if(i>2 &&Globals.siegeCells[i-2, f].GetNextDirection()!= SiegeFunctions.Direction.Right)
+                                {
+                                    Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Left);
+                                }
+                            }
+                        }
+                        else if((i <Globals.height-2 && ( Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop || Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground )) )
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Right);
                         }
                     }
                     //Ladders
@@ -288,10 +377,21 @@ namespace WindowsFormsApp1
                             Globals.siegeCells[i, f - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
                         }
                     }
+                    //Rohan
+                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Rohan)
+                    {
+                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Urkhai) || GetNearbyCells(i, f, SiegeFunctions.CellTypes.UrkhaiElite))
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                Globals.siegeCells[i, f].wounded = true;
+                            }
+                        }
+                    }
                 }
             }
         }
-        public static void DisplayCells(Form1 f)
+        public static void DisplayCells(Form1 f,Random rand)
         {
             Form1 form1 = f;
             SolidBrush brush  = new SolidBrush(Color.Transparent);
@@ -346,7 +446,36 @@ namespace WindowsFormsApp1
 
 
                     }
+                    //If WOunded, change color to red
+                    if(Globals.siegeCells[r, i].wounded)
+                    {
+                        brush.Color = Color.FromArgb(255, 255, 125, 125);
+                    }
                     g.FillRectangle(brush,new Rectangle(new Point((20*r)+50,(20*i)+100),new Size(20,20)));
+                    if (Globals.siegeCells[r,i].GetCellType() == SiegeFunctions.CellTypes.Urkhai)
+                    {
+                        Pen smotherPen = new Pen(Color.LightGray);
+                        for (int z = 0; z < 1; z++)
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                int one = rand.Next(20) + (20 * r) + 50;
+                                int two = rand.Next(20) + (20 * i) + 100;
+                                int three = one + (rand.Next(10) - 5);
+                                int four = two + (rand.Next(10) - 5);
+                                if (three < 0)
+                                {
+                                    three = 0;
+                                }
+                                if (four < 0)
+                                {
+                                    four = 0;
+                                }
+                                g.DrawLine(smotherPen, one, two, three, four);
+                            }
+                        }
+                    }
+                    
                 }
             }
             f.Update();
