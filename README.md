@@ -31,25 +31,15 @@ Still In progress
 
 ## Latest Update
 
-15/09/2019 - Unit Handling
-	WorkerFunctions.cs -> Refractor 'FillCells' component that set what cell would be what type to a 'setCell' funtion.
-	WorkerFunctions.cs -> Modify 'RunAnimation' so it spawns new units at the end and completes new ladders from last cycle, for aesthetic.
-	WorkerFunctions.cs -> Modify 'SetCell' so it spawns new units only 4 tiles away from the bottom of the wall, for aesthetic.
-	WorkerFunctions.cs -> Modify 'DisplayCells' so that after drawing, it sprays grey lines on 'Urkahai' & 'Rohan' tiles. This is for aesthetic.
-		This required passing a Random instance to 'DislayCells'
-	WorkerFunctions.cs -> Modify 'SetCell' so wall top fills up or down depending on leftmost walltop, to bulk up walls
-	WorkerFunctions.cs -> Modify 'SetupSiegeAnimation' so there is a 33% change Rohan or Urkahai units touching will be 'wounded'.
-		This method now also resets wounded on each loop, so a unit will only be wounded for 1 cycle. This required making
-		'SetupSiegeAnimation' take a 'Random' instacne.
-	SiegeFunctions.cs -> Modify 'SiegeCell' to have a 'wounded' bool. WorkerFunctions.cs 'DispalyCell' will draw as red if true.
-	WorkerFunctions.cs -> Refractor 'RunAnimations' component that made it so area below the unit that has moved on will be reset, 
-		regardless of direction rather than only on 'UP' movements. Added handling for 'LEFT' and 'RIGHT' movements
-	WorkerFunctions.cs -> Modify 'SetupSiegeAnimation' so 'Urkahai' or 'UrkahaiElites' will move left or right if on the wall.
-		This is for aesthetics
-
+12/10/2020- Unit Handling
+	HelmsDeepApp -> Add GifWriter Class to output .GIF files from series of .PNGs
+	WorkerFunctions.cs>HelmsDeepButton -> Add creation of GifWriter before main loop to handel GIF creation
+	WorkerFunctions.cs>HelmsDeepButton -> Add Each 'DispalyCell' Grpahic in main loop to the above GifWriter to create output content
+	WorkerFunctions.cs>DisplayCell -> Modify to take a Bitmap as a parameter, drawing to that then copying that Grpahic to the relevant 'Form' so 
+		that graphics are being drawn to an object that can can be saved.
 ## Next Build
 
-Week ending 11/10/2020 -Release 1.0
+Week ending 11/10/2020 -Release 1.0 ***DELAYED*** New Release 31/10/2020
 
 * Add casulty/unit removal after enough 'wounds'
 
@@ -73,7 +63,8 @@ I plan on this project improving my skills in the following:
 ## Installing and Compiling:
 * NOTE * Windows machine only
 
-1) UnZIP the 'Executable' ZIP file after downloading this repo
+1) Un-ZIP the 'Executable' ZIP file after downloading this repo
 2) Double click the 'HelmsDeep.exe' file in the extracted folder
 3) Hit 'Start Helm's Deep Siege' To begin animating in the window
+4) The Finished .GIF file will be stored in the dir you ran the program from.
 ![HelpImage](Help.PNG)

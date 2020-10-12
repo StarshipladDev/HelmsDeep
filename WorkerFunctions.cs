@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -184,22 +186,33 @@ namespace WindowsFormsApp1
         }
         public static void HelmsDeepButton(Form1 f)
         {
-
+            Stream s = File.Create("Output.gif");
+            StreamWriter sw = new StreamWriter(s);
+            GifWriter gw = new GifWriter(s,350,1) ;
             Random rand = new Random();
             FillCells();
-            DisplayCells(f,rand);
-            for(int i=0; i<40; i++)
+
+            Bitmap m = new Bitmap(600, 600);
+            //Graphics g = Graphics.FromImage(m);
+            DisplayCells(f,rand,m);
+
+            for (int i=0; i<15; i++)
             {
                 Debug.WriteLine(" I is "+i);
                 Globals.PrintCells();
                 SetUpSiegeAnimation(rand);
                 RunAnimation();
-                DisplayCells(f,rand);
-
-                Debug.WriteLine(" I is still" + i);
+                DisplayCells(f,rand,m);
+                m.Save("temp.png", ImageFormat.Png);
                 Globals.PrintCells();
+                //Image netFrame = Image.FromFile("temp.png"); ;
+                gw.WriteFrame(m);
                 Thread.Sleep(1000);
             }
+            //g.Dispose();
+            m.Dispose();
+            gw.Dispose();
+            s.Close();
 
         }
         public static bool GetNearbyCells(int x, int y, SiegeFunctions.CellTypes search)
@@ -391,11 +404,11 @@ namespace WindowsFormsApp1
                 }
             }
         }
-        public static void DisplayCells(Form1 f,Random rand)
+        public static void DisplayCells(Form1 f,Random rand,Bitmap m)
         {
             Form1 form1 = f;
             SolidBrush brush  = new SolidBrush(Color.Transparent);
-            Graphics g = f.CreateGraphics();
+            Graphics g = Graphics.FromImage(m);
             for (int r = 0; r < Globals.siegeCells.GetLength(0); r++)
             {
                 for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
@@ -478,7 +491,13 @@ namespace WindowsFormsApp1
                     
                 }
             }
+            
+            Graphics gg = f.CreateGraphics();
+            gg = g;
             f.Update();
+
+            //Thread.Sleep(1000);
+            gg.Dispose();
             g.Dispose();
         }
         public static void HelmsDeepFunction(object sender,EventArgs e)
