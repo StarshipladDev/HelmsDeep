@@ -25,7 +25,7 @@ This is a short C# project designed to replicate a hand-drawn micro .GIF (animat
 
 ![Progress Image](Progress.png)
 *The below GIF file is output by the program*
-![Progress Gif] (Progressgif.gif)
+![Progress Gif](Progressgif.gif)
 
 ## Latest Build
 Still In progress
