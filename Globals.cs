@@ -13,6 +13,8 @@ namespace WindowsFormsApp1
         public static SiegeFunctions.SiegeCell[,] siegeCells = new SiegeFunctions.SiegeCell[height,height];
         public static int[] wallHeight = new int[height];
         public static  int[] cityHeight = new int[height];
+        public static int[] cityBackgroundHeight = new int[height];
+
         public static bool print = false;
         public static void PrintCells()
         {

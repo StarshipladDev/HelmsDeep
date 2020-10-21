@@ -23,7 +23,8 @@ namespace WindowsFormsApp1
             WallTop,
             UrkhaiElite,
             Night,
-            Ground
+            Ground,
+            BackgroundCity
 
 
         }

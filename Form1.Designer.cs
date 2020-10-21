@@ -35,12 +35,16 @@ namespace WindowsFormsApp1
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Text = "Form1";
+            #region Start Button
+            //
+            //START BUTTON
+            //
             this.startButton = new Button();
-            this.startButton.Location = new System.Drawing.Point(0,0);
+            this.startButton.Location = new System.Drawing.Point(400,200);
             this.startButton.Size = new System.Drawing.Size(100, 50);
             this.startButton.Text = "Start Helms Deep Siege";
             this.startButton.Click += WorkerFunctions.HelmsDeepFunction;
-
+            #endregion
             this.Controls.Add(startButton);
 
         }

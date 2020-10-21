@@ -2,48 +2,57 @@
 
 ![Helms Deep](SalesPitch.PNG)
 
-This is a short C# project designed to replicate a handdrawn micro .GIF animated image by
-automating the rules I followed while hand drawing the GIF.
+This is a short C# project designed to replicate a hand-drawn micro .GIF (animated) image ,by automating the rules I followed while hand-drawing the GIF.
 ![AnimatedGIF](HelmsDeep.gif)
 
 
 ## Notes/Know Bugs:
 
-> 'Night' Tiles may go down so far there is no 'City' tiles between 'Top Wall' Tiles and 'Night'
+> No known bugs at the moment. Please email bugfinder@starshiplad.com with any bugs you find.
 
 ## Features(Planned In Brackets)
 
-> (Aniamted .GIF file)
-
-> (Export .GIF file of project)
-
 > Automates the hand-drawing process used to draw https://twitter.com/StarshipladDevp/status/1300752966299734017
 
-> Animates the inital frame
+> Animated .GIF file
+
+> Export .GIF file after creation
+
+> Animates the inital frame as a PNG
 
 
 ## View of progress
 
 ![Progress Image](Progress.png)
+*The below GIF file is output by the program*
+![Progress Gif] (Progressgif.gif)
 
 ## Latest Build
 Still In progress
 
 ## Latest Update
 
-12/10/2020- Unit Handling
-	HelmsDeepApp -> Add GifWriter Class to output .GIF files from series of .PNGs
-	WorkerFunctions.cs>HelmsDeepButton -> Add creation of GifWriter before main loop to handel GIF creation
-	WorkerFunctions.cs>HelmsDeepButton -> Add Each 'DispalyCell' Grpahic in main loop to the above GifWriter to create output content
-	WorkerFunctions.cs>DisplayCell -> Modify to take a Bitmap as a parameter, drawing to that then copying that Grpahic to the relevant 'Form' so 
-		that graphics are being drawn to an object that can can be saved.
+21/10/2020 -Comments & Background City:
+
+WorkerFunctions ->Add Comments to all major Functions
+
+Globals -> Add a 'backgroundCityHeight' Array that acts similar to Globals.cityHeight and wallHeight to match handdrawn GIFs
+
+WorkerFunctions FillCells -> Add a 'backgroundCityHeight' generator that fills cells similar to Globals.cityHeight and wallHeight to match handdrawn GIFs
+
+SiegeFunction CellTypes -> Add 'BackgroundCity' Celltype to draw handdraw GIF backgroundCity pixels
+
+WorkerFunctions DispalyCells -> As per above changes, add handling of drawing 'backgroundCity' tiles to match handdrawn GIFs
+
+WorkerFunctions DispalyCells ->  Add parameter 'frame', add Title Change of refrenced form to dispaly the current 'frame' being drawn, so that progress can be tracked
+
 ## Next Build
 
 Week ending 11/10/2020 -Release 1.0 ***DELAYED*** New Release 31/10/2020
 
 * Add casulty/unit removal after enough 'wounds'
 
-* Improve the Background City, add bomb handling
+* Improve the Background City, maybe bomb handling
 
 * GIF Output
 
