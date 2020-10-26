@@ -34,6 +34,7 @@ namespace WindowsFormsApp1
             Down,
             Left,
             Right,
+            Destroy,
             None
         }
         public class SiegeCell

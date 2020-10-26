@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
+    /// <summary>
+    /// Globals is a static class that contains all other parameters and objects an instance of 'SiegeGenerator' should
+    /// have access to.
+    /// </summary>
     public static class Globals
     {
         public static int height = 20;
@@ -16,6 +20,10 @@ namespace WindowsFormsApp1
         public static int[] cityBackgroundHeight = new int[height];
 
         public static bool print = false;
+        /// <summary>
+        /// PrintCells prints out the state of each cell (It's direction and type) in order if the Globals.print bool is 'true'.
+        /// It is for debugging purposes
+        /// </summary>
         public static void PrintCells()
         {
             for(int i=0; i < height; i++)

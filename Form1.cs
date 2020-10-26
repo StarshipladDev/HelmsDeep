@@ -14,6 +14,8 @@ namespace WindowsFormsApp1
     {
         public Form1()
         {
+
+            this.Icon = new System.Drawing.Icon("SiegeGen.ico");
             InitializeComponent();
         }
     }

@@ -22,6 +22,59 @@ namespace WindowsFormsApp1
 
     class WorkerFunctions
     {
+
+
+
+        /// <summary>
+        /// HelmsDeepFunction is a listner Function that cna be assigned to a button.
+        /// It runs the function <see cref="HelmsDeepButton"/>
+        /// </summary>
+        /// <param name="sender">The object that made the request</param>
+        /// <param name="e">The parameters of the context this function was called</param>
+        public static void HelmsDeepFunction(object sender, EventArgs e)
+        {
+            Button senderButton = (Button)sender;
+            Form1 f = (Form1)senderButton.Parent;
+            HelmsDeepButton(f);
+        }
+        /// <summary>
+        /// HelmsDeepButton is a Static method that resets the etire GIF drawing process,
+        /// resets all cells, redraws each cell, and prints a specified ammount of frames,
+        /// both to a form passed and to an output 'Output.gif' file.
+        /// </summary>
+        /// <param name="f">The form to draw the new frames to</param>
+        /// <param name="frames">The ammount of frames to print</param>
+        public static void HelmsDeepButton(Form1 f, int frames = 20)
+        {
+            Stream s = File.Create("Output.gif");
+            StreamWriter sw = new StreamWriter(s);
+            GifWriter gw = new GifWriter(s, 350, 1);
+            Random rand = new Random();
+            FillCells();
+            Bitmap m = new Bitmap(400, 400);
+            //Graphics g = Graphics.FromImage(m);
+            DisplayCells(f, rand, m);
+            Graphics gg = f.CreateGraphics();
+            gg.DrawImage(new Bitmap("Help.png"), 400, 50);
+            gg.Dispose();
+            for (int i = 0; i < frames; i++)
+            {
+                Debug.WriteLine(" I is " + i);
+                Globals.PrintCells();
+                SetUpSiegeAnimation(rand);
+                RunAnimation();
+                DisplayCells(f, rand, m, i);
+                m.Save("temp.png", ImageFormat.Png);
+                Globals.PrintCells();
+                gw.WriteFrame(m);
+                Thread.Sleep(1000);
+            }
+            //g.Dispose();
+            m.Dispose();
+            gw.Dispose();
+            s.Close();
+
+        }
         /// <summary>
         /// RefillCells sets all of GLobal's 'gridlist' to be empty
         /// </summary>
@@ -135,7 +188,8 @@ namespace WindowsFormsApp1
             }
         }
         /// <summary>
-        /// FillSells
+        /// FillCells is a function that fills all cells in Globals.Siegegrid with the default 'ground'
+        /// tile. It also randomly generates the 'horizon' height of the various background layers such as <see cref="SiegeFunctions.CellTypes.CityProper"/>
         /// </summary>
         public static void FillCells()
         {
@@ -207,6 +261,8 @@ namespace WindowsFormsApp1
                 {
                     cityHeight[i]++;
                 }
+                /*
+                 * REMOVED 26/10/2020 due to customer feedback 
                 if (wallHeightChange == 0)
                 {
                     wallHeight[i]--;
@@ -215,6 +271,7 @@ namespace WindowsFormsApp1
                 {
                     wallHeight[i]++;
                 }
+                */
                 if (cityBackgroundHeightChange == 0)
                 {
                     cityBackgroundHeight[i]--;
@@ -239,43 +296,302 @@ namespace WindowsFormsApp1
                 Debug.Write("\n");
             }
         }
+
         /// <summary>
-        /// HelmsDeepButton is a Static method that resets the etire GIF drawing process,
-        /// resets all cells, redraws each cell, and prints a specified ammount of frames,
-        /// both to a form passed and to an output 'Output.gif' file.
+        /// SetUpSiegeAnimation is a function to iteratively decide the next state a cell will be in based
+        /// on gamelogic and the cellType. These next steps are carried out in <see cref="RunAnimation"/>
         /// </summary>
-        /// <param name="f">The form to draw the new frames to</param>
-        /// <param name="frames">The ammount of frames to print</param>
-        public static void HelmsDeepButton(Form1 f,int frames=20)
+        /// <param name="rand">An instance of <see cref="Random"/></param>
+        public static void SetUpSiegeAnimation(Random rand)
         {
-            Stream s = File.Create("Output.gif");
-            StreamWriter sw = new StreamWriter(s);
-            GifWriter gw = new GifWriter(s,350,1) ;
-            Random rand = new Random();
-            FillCells();
-
-            Bitmap m = new Bitmap(600, 600);
-            //Graphics g = Graphics.FromImage(m);
-            DisplayCells(f,rand,m);
-
-            for (int i = 0; i < frames; i++)
+            for (int i = 0; i < Globals.siegeCells.GetLength(1); i++)
             {
-                Debug.WriteLine(" I is "+i);
-                Globals.PrintCells();
-                SetUpSiegeAnimation(rand);
-                RunAnimation();
-                DisplayCells(f,rand,m,i);
-                m.Save("temp.png", ImageFormat.Png);
-                Globals.PrintCells();
-                gw.WriteFrame(m);
-                Thread.Sleep(1000);
-            }
-            //g.Dispose();
-            m.Dispose();
-            gw.Dispose();
-            s.Close();
+                for (int f = 1; f < Globals.siegeCells.GetLength(1); f++)
+                {
+                    //Default-> set direction as none
+                    Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.None);
+                    Globals.siegeCells[i, f].wounded = false;
+                    //Urkhai , Elites and Torches
+                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Urkhai || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Torch || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.UrkhaiElite)
+                    {
+                        //If touching Rohan Soldier, set one as wounded
+                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Rohan))
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                Globals.siegeCells[i, f].wounded = true;
+                            }
+                        }
 
+                        //If below Wallbase, and cell in front is free or will be free, move foward
+                        else if (f > Globals.wallHeight[i] + 3 && (Globals.siegeCells[i, f - 1].GetNextDirection() == SiegeFunctions.Direction.Up || Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.Ground))
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
+                        }
+                        //Move up if ladder on wall above
+                        else if (f >= Globals.wallHeight[i] && (Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.Ladder || Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.WallTop))
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
+                        }
+                        //If on wall and Left or Right Wall free && WallTop or Ground, move there
+                        else if (rand.Next(2) > 0)
+                        {
+                            if ((i > 1 && ((Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop) || (Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground))))
+                            {
+                                if (i > 2 && Globals.siegeCells[i - 2, f].GetNextDirection() != SiegeFunctions.Direction.Right)
+                                {
+                                    Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Left);
+                                }
+                            }
+                        }
+                        else if ((i < Globals.height - 2 && (Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop || Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground)))
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Right);
+                        }
+                    }
+                    //Ladders
+                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Ladder)
+                    {
+                        //If below Wall, keep moving
+                        if (f > Globals.wallHeight[i] + 3)
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
+                        }
+                        //If at Wall and ladder following, stop
+                        else if (f == Globals.wallHeight[i] + 3 && Globals.siegeCells[i, f + 1].GetCellType() == SiegeFunctions.CellTypes.Ladder)
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.None);
+                        }
+                        //If at wall and behind isn't Urkahai
+                        else if (f == Globals.wallHeight[i] + 3 && Globals.siegeCells[i, f + 1].GetCellType() != SiegeFunctions.CellTypes.Ladder)
+                        {
+                            Globals.siegeCells[i, f - 1].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                            Globals.siegeCells[i, f - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                        }
+                    }
+                    //Rohan
+                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Rohan)
+                    {
+                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Urkhai) || GetNearbyCells(i, f, SiegeFunctions.CellTypes.UrkhaiElite))
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                Globals.siegeCells[i, f].wounded = true;
+                            }
+                        }
+                    }
+                    //If wounded destroy on 33%chance
+                    if (Globals.siegeCells[i, f].wounded)
+                    {
+                        if (rand.Next(4) == 0)
+                        {
+                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Destroy);
+                        }
+                    }
+                }
+            }
         }
+
+        /// <summary>
+        /// RunAnimation is a static porcessor function used to change the state of Globals.Siegecells to create the next
+        /// 'frame'.
+        /// RunAnimation is where the actions decided in <see cref="SetUpSiegeAnimation(Random)"/> are put into effect in the form
+        /// of a state change or 'new frame'
+        /// </summary>
+        public static void RunAnimation()
+        {
+            for (int i = 0; i < Globals.siegeCells.GetLength(1); i++)
+            {
+                for (int f = 0; f < Globals.siegeCells.GetLength(1); f++)
+                {
+                    if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Up)
+                    {
+
+                        Globals.siegeCells[i, f - 1].SetCellType(Globals.siegeCells[i, f].GetCellType());
+                        
+                    }
+                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Left)
+                    {
+
+                        Globals.siegeCells[i-1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
+
+                    }
+                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Right)
+                    {
+
+                        Globals.siegeCells[i+1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
+
+                    }
+                    //RESET AREA BELOW
+                    if (Globals.siegeCells[i, f].GetNextDirection() != SiegeFunctions.Direction.None)
+                    {
+                        if (f > Globals.wallHeight[i] + 2)
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
+                        }
+                        else if (f > Globals.wallHeight[i])
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                        }
+                        else if (f <= Globals.wallHeight[i])
+                        {
+                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
+                        }
+                    }
+                    
+                }
+            }
+            //Create new units and place them in the bottom row
+            int newUnitCounter=0;
+            Random rand = new Random();
+            for (int i = 0; i < Globals.height - 1; i++)
+            {
+                //If unit ahead is Ladder start, make that ladder and make current unit ladder
+                if (Globals.siegeCells[i, Globals.height - 1].GetCellType() == SiegeFunctions.CellTypes.LadderStart)
+                {
+                    Globals.siegeCells[i, Globals.height - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
+                    Globals.siegeCells[i, Globals.height-1].SetCellType(SiegeFunctions.CellTypes.Ladder);
+
+                }
+                // Otherwise replace 3 ground tiles with new units
+                else if (newUnitCounter<5 && Globals.siegeCells[i, Globals.height-1].GetCellType()==(SiegeFunctions.CellTypes.Ground))
+                {
+                    if (rand.Next(2) > 0)
+                    {
+                        SetCell(i, Globals.height-1,rand);
+                        newUnitCounter++;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// DispalyCells draws <see cref="Globals"/>'s SiegeCells array.
+        /// Dispaly cell, for eachcell Type, decide a Solidbrush color, and then draws a 
+        /// 20x20px square in that color, modiefied by nearby lighting. This drawing takes place
+        /// in both an external bitmap and on a refrenced <see cref="Form"/>.
+        /// Square are drawn left to right, top to bottom
+        /// </summary>
+        /// <param name="f">The Windows Form to Draw on</param>
+        /// <param name="rand">An instance of <see cref="Random"/> to generate random objects</param>
+        /// <param name="m">The bitmap to draw to</param>
+        /// <param name="frame">The number 'frame' that is being drawn so the Form 'f' can have it's title edited to show progress</param>
+        public static void DisplayCells(Form1 f,Random rand,Bitmap m,int frame=0)
+        {
+
+            int xOffset = 0;
+            int yOffset = 0;
+            Form1 form1 = f;
+            form1.Text="SiegeGen Rendering Frame "+frame;
+            SolidBrush brush  = new SolidBrush(Color.Transparent);
+            Graphics g = Graphics.FromImage(m);
+
+            Graphics gg = f.CreateGraphics();
+            for (int r = 0; r < Globals.siegeCells.GetLength(0); r++)
+            {
+                for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
+                {
+                    switch(Globals.siegeCells[r, i].GetCellType()){
+                        case (SiegeFunctions.CellTypes.Ground):
+                            brush.Color = Color.FromArgb(255,178,123,89);
+                            break;
+                        case (SiegeFunctions.CellTypes.Wall):
+                            brush.Color = Color.FromArgb(255, 128, 128, 128);
+                            break;
+                        case (SiegeFunctions.CellTypes.WallTop):
+                            brush.Color = Color.FromArgb(255, 100, 100, 100);
+                            break;
+                        case (SiegeFunctions.CellTypes.Night):
+                            brush.Color = Color.FromArgb(255, 0, 0, 0);
+                            break;
+                        case (SiegeFunctions.CellTypes.CityProper):
+                            brush.Color = Color.FromArgb(255, 72, 72, 72);
+                            break;
+                        case (SiegeFunctions.CellTypes.Rohan):
+
+                            brush.Color = Color.FromArgb(255, 165, 255, 127);
+                            break;
+                        case (SiegeFunctions.CellTypes.Torch):
+
+                            brush.Color = Color.FromArgb(255, 255, 216, 0);
+                            break;
+                        case (SiegeFunctions.CellTypes.BackgroundCity):
+
+                            brush.Color = Color.FromArgb(255, 54, 54, 54);
+                            break;
+                        case (SiegeFunctions.CellTypes.Urkhai):
+
+                            brush.Color = Color.FromArgb(255, 48, 48, 48);
+                            
+                            break;
+                        case (SiegeFunctions.CellTypes.UrkhaiElite):
+
+                            brush.Color = Color.FromArgb(255, 192, 192, 192);
+                            break;
+                       case (SiegeFunctions.CellTypes.Ladder):
+                             brush.Color = Color.FromArgb(255, 127, 63, 63);
+                            break;
+                        case (SiegeFunctions.CellTypes.LadderStart):
+                            brush.Color = Color.FromArgb(255, 127, 63, 63);
+                            break;
+                        default:
+                                brush.Color = Color.FromArgb(165, 255, 0, 0);
+                                break;
+
+
+                    }
+                    //Add Light between 10&&15 if torch nearby Non-ground,non-torch
+                    if (GetNearbyCells(r, i, SiegeFunctions.CellTypes.Torch) && Globals.siegeCells[r, i].GetCellType()!=SiegeFunctions.CellTypes.Torch && Globals.siegeCells[r, i].GetCellType() != SiegeFunctions.CellTypes.Ground && Globals.siegeCells[r, i].GetCellType() != SiegeFunctions.CellTypes.BackgroundCity)
+                    {
+                        int Lightchange = rand.Next(10) +5;
+                        brush.Color = Color.FromArgb(255, (brush.Color.R+ Lightchange)%255, (brush.Color.B+ Lightchange)%255, (brush.Color.G+ Lightchange)%255);
+                    }
+                    //If torch and nearbycell cityBackground, randomize brightness
+                    if (GetNearbyCells(r, i, SiegeFunctions.CellTypes.BackgroundCity) && Globals.siegeCells[r, i].GetCellType() == SiegeFunctions.CellTypes.Torch)
+                    {
+                        int Lightchange = rand.Next(100) + 155;
+                        brush.Color = Color.FromArgb(255,Lightchange,Lightchange,0);
+                    }
+                    //If WOunded, change color to red
+                    if (Globals.siegeCells[r, i].wounded)
+                    {
+                        brush.Color = Color.FromArgb(255, (brush.Color.R+100)%255, brush.Color.G%100, brush.Color.B%100);
+                    }
+                    g.FillRectangle(brush,new Rectangle(new Point((20*r)+xOffset,(20*i)+yOffset),new Size(20,20)));
+                    gg.FillRectangle(brush, new Rectangle(new Point((20 * r) + xOffset, (20 * i) + yOffset), new Size(20, 20)));
+                    if (Globals.siegeCells[r, i].GetCellType() == SiegeFunctions.CellTypes.Urkhai || Globals.siegeCells[r, i].GetCellType() == SiegeFunctions.CellTypes.Rohan)
+                    {
+                        Pen smotherPen = new Pen(Color.LightGray);
+                        for (int z = 0; z < 1; z++)
+                        {
+                            if (rand.Next(3) > 1)
+                            {
+                                int one = rand.Next(20) + (20 * r) + xOffset;
+                                int two = rand.Next(20) + (20 * i) + yOffset;
+                                int three = one + (rand.Next(10) - 5);
+                                int four = two + (rand.Next(10) - 5);
+                                if (three < 0)
+                                {
+                                    three = 0;
+                                }
+                                if (four < 0)
+                                {
+                                    four = 0;
+                                }
+                                g.DrawLine(smotherPen, one, two, three, four);
+                                gg.DrawLine(smotherPen, one, two, three, four);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            f.Update();
+
+            //Thread.Sleep(1000);
+            gg.Dispose();
+            g.Dispose();
+        }
+
         /// <summary>
         /// A utility function to see if a cell of type 'search' is adjacent to the specified co-ords
         /// </summary>
@@ -326,290 +642,6 @@ namespace WindowsFormsApp1
                 }
             }
             return false;
-        }
-        /// <summary>
-        /// RunAnimation is a static porcessor function used to change the state of Globals.Siegecells to create the next
-        /// 'frame'.
-        /// RunAnimation is where the actions decided in <see cref="SetUpSiegeAnimation(Random)"/> are put into effect in the form
-        /// of a state change or 'new frame'
-        /// </summary>
-        public static void RunAnimation()
-        {
-            for (int i = 0; i < Globals.siegeCells.GetLength(1); i++)
-            {
-                for (int f = 1; f < Globals.siegeCells.GetLength(1); f++)
-                {
-                    if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Up)
-                    {
-
-                        Globals.siegeCells[i, f - 1].SetCellType(Globals.siegeCells[i, f].GetCellType());
-                        
-                    }
-                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Left)
-                    {
-
-                        Globals.siegeCells[i-1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
-
-                    }
-                    else if (Globals.siegeCells[i, f].GetNextDirection() == SiegeFunctions.Direction.Right)
-                    {
-
-                        Globals.siegeCells[i+1,f].SetCellType(Globals.siegeCells[i, f].GetCellType());
-
-                    }
-                    //RESET AREA BELOW
-                    if(Globals.siegeCells[i, f].GetNextDirection() != SiegeFunctions.Direction.None)
-                    {
-                        if (f > Globals.wallHeight[i] + 2)
-                        {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ground);
-                        }
-                        else if (f > Globals.wallHeight[i])
-                        {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                        }
-                        else if (f <= Globals.wallHeight[i])
-                        {
-                            Globals.siegeCells[i, f].SetCellType(SiegeFunctions.CellTypes.WallTop);
-                        }
-                    }
-                    
-                }
-            }
-            int newUnitCounter=0;
-            Random rand = new Random();
-            for (int i = 0; i < Globals.height - 1; i++)
-            {
-                //If unit ahead is Ladder start, make that ladder and make current unit ladder
-                if (Globals.siegeCells[i, Globals.height - 1].GetCellType() == SiegeFunctions.CellTypes.LadderStart)
-                {
-                    Globals.siegeCells[i, Globals.height - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                    Globals.siegeCells[i, Globals.height-1].SetCellType(SiegeFunctions.CellTypes.Ladder);
-
-                }
-                // Otherwise replace 3 ground tiles with new units
-                else if (newUnitCounter<5 && Globals.siegeCells[i, Globals.height-1].GetCellType()==(SiegeFunctions.CellTypes.Ground))
-                {
-                    if (rand.Next(2) > 0)
-                    {
-                        SetCell(i, Globals.height-1,rand);
-                        newUnitCounter++;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// SetUpSiegeAnimation is a function to iteratively decide the next state a cell will be in based
-        /// on gamelogic and the cellType. These next steps are carried out in <see cref="RunAnimation"/>
-        /// </summary>
-        /// <param name="rand">An instance of <see cref="Random"/></param>
-        public static void SetUpSiegeAnimation(Random rand){
-            for(int i=0; i< Globals.siegeCells.GetLength(1); i++)
-            {
-                for (int f = 1; f < Globals.siegeCells.GetLength(1); f++)
-                {
-                    //Default-> set direction as none
-                    Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.None);
-                    Globals.siegeCells[i, f].wounded = false;
-                    //Urkhai , Elites and Torches
-                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Urkhai || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Torch || Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.UrkhaiElite)
-                    {
-                        //If touching Rohan Soldier, set one as wounded
-                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Rohan))
-                        {
-                            if (rand.Next(3) > 1)
-                            {
-                                Globals.siegeCells[i, f].wounded = true;
-                            }
-                        }
-
-                        //If below Wallbase, and cell in front is free or will be free, move foward
-                        else if (f > Globals.wallHeight[i] + 3 && (Globals.siegeCells[i,f-1].GetNextDirection()== SiegeFunctions.Direction.Up || Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ground))
-                        {
-                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
-                        }
-                        //Move up if ladder on wall above
-                        else if (f >= Globals.wallHeight[i] && (Globals.siegeCells[i, f - 1].GetCellType()== SiegeFunctions.CellTypes.Ladder || Globals.siegeCells[i, f - 1].GetCellType() == SiegeFunctions.CellTypes.WallTop))
-                        {
-                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
-                        }
-                        //If on wall and Left or Right Wall free && WallTop or Ground, move there
-                        else if (rand.Next(2) > 0)
-                        {
-                            if ((i > 1 && (( Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop)|| (Globals.siegeCells[i - 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground))))
-                            {
-                                if(i>2 &&Globals.siegeCells[i-2, f].GetNextDirection()!= SiegeFunctions.Direction.Right)
-                                {
-                                    Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Left);
-                                }
-                            }
-                        }
-                        else if((i <Globals.height-2 && ( Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.WallTop || Globals.siegeCells[i + 1, f].GetCellType() == SiegeFunctions.CellTypes.Ground )) )
-                        {
-                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Right);
-                        }
-                    }
-                    //Ladders
-                    if(Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Ladder)
-                    {
-                        //If below Wall, keep moving
-                        if (f > Globals.wallHeight[i] + 3)
-                        {
-                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.Up);
-                        }
-                        //If at Wall and ladder following, stop
-                        else if (f == Globals.wallHeight[i] + 3 && Globals.siegeCells[i, f + 1].GetCellType() == SiegeFunctions.CellTypes.Ladder)
-                        {
-                            Globals.siegeCells[i, f].SetNextDirection(SiegeFunctions.Direction.None);
-                        }
-                        //If at wall and behind isn't Urkahai
-                        else if(f == Globals.wallHeight[i] + 3 && Globals.siegeCells[i, f + 1].GetCellType() != SiegeFunctions.CellTypes.Ladder)
-                        {
-                            Globals.siegeCells[i, f - 1].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                            Globals.siegeCells[i, f - 2].SetCellType(SiegeFunctions.CellTypes.Ladder);
-                        }
-                    }
-                    //Rohan
-                    if (Globals.siegeCells[i, f].GetCellType() == SiegeFunctions.CellTypes.Rohan)
-                    {
-                        if (GetNearbyCells(i, f, SiegeFunctions.CellTypes.Urkhai) || GetNearbyCells(i, f, SiegeFunctions.CellTypes.UrkhaiElite))
-                        {
-                            if (rand.Next(3) > 1)
-                            {
-                                Globals.siegeCells[i, f].wounded = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// DispalyCells draws <see cref="Globals"/>'s SiegeCells array.
-        /// Dispaly cell, for eachcell Type, decide a Solidbrush color, and then draws a 
-        /// 20x20px square in that color, modiefied by nearby lighting. This drawing takes place
-        /// in both an external bitmap and on a refrenced <see cref="Form"/>.
-        /// Square are drawn left to right, top to bottom
-        /// </summary>
-        /// <param name="f">The Windows Form to Draw on</param>
-        /// <param name="rand">An instance of <see cref="Random"/> to generate random objects</param>
-        /// <param name="m">The bitmap to draw to</param>
-        /// <param name="frame">The number 'frame' that is being drawn so the Form 'f' can have it's title edited to show progress</param>
-        public static void DisplayCells(Form1 f,Random rand,Bitmap m,int frame=0)
-        {
-            int xOffset = 0;
-            int yOffset = 0;
-            Form1 form1 = f;
-            form1.Text="SiegeGen Rendering Frame "+frame;
-            SolidBrush brush  = new SolidBrush(Color.Transparent);
-            Graphics g = Graphics.FromImage(m);
-
-            Graphics gg = f.CreateGraphics();
-            for (int r = 0; r < Globals.siegeCells.GetLength(0); r++)
-            {
-                for (int i = 0; i < Globals.siegeCells.GetLength(0); i++)
-                {
-                    switch(Globals.siegeCells[r, i].GetCellType()){
-                        case (SiegeFunctions.CellTypes.Ground):
-                            brush.Color = Color.FromArgb(255,178,123,89);
-                            break;
-                        case (SiegeFunctions.CellTypes.Wall):
-                            brush.Color = Color.FromArgb(255, 128, 128, 128);
-                            break;
-                        case (SiegeFunctions.CellTypes.WallTop):
-                            brush.Color = Color.FromArgb(255, 89, 89, 89);
-                            break;
-                        case (SiegeFunctions.CellTypes.Night):
-                            brush.Color = Color.FromArgb(255, 0, 0, 0);
-                            break;
-                        case (SiegeFunctions.CellTypes.CityProper):
-                            brush.Color = Color.FromArgb(255, 64, 64, 64);
-                            break;
-                        case (SiegeFunctions.CellTypes.Rohan):
-
-                            brush.Color = Color.FromArgb(255, 165, 255, 127);
-                            break;
-                        case (SiegeFunctions.CellTypes.Torch):
-
-                            brush.Color = Color.FromArgb(255, 255, 216, 0);
-                            break;
-                        case (SiegeFunctions.CellTypes.BackgroundCity):
-
-                            brush.Color = Color.FromArgb(255, 32, 32, 32);
-                            break;
-                        case (SiegeFunctions.CellTypes.Urkhai):
-
-                            brush.Color = Color.FromArgb(255, 48, 48, 48);
-                            if(GetNearbyCells(r,i, SiegeFunctions.CellTypes.Torch))
-                            {
-
-                                brush.Color = Color.FromArgb(255, 71, 71, 71);
-                            }
-                            break;
-                        case (SiegeFunctions.CellTypes.UrkhaiElite):
-
-                            brush.Color = Color.FromArgb(255, 192, 192, 192);
-                            break;
-                       case (SiegeFunctions.CellTypes.Ladder):
-                             brush.Color = Color.FromArgb(255, 127, 63, 63);
-                            break;
-                        default:
-                                brush.Color = Color.FromArgb(165, 255, 0, 0);
-                                break;
-
-
-                    }
-                    //If WOunded, change color to red
-                    if(Globals.siegeCells[r, i].wounded)
-                    {
-                        brush.Color = Color.FromArgb(255, 255, 125, 125);
-                    }
-                    g.FillRectangle(brush,new Rectangle(new Point((20*r)+xOffset,(20*i)+yOffset),new Size(20,20)));
-                    gg.FillRectangle(brush, new Rectangle(new Point((20 * r) + xOffset, (20 * i) + yOffset), new Size(20, 20)));
-                    if (Globals.siegeCells[r,i].GetCellType() == SiegeFunctions.CellTypes.Urkhai)
-                    {
-                        Pen smotherPen = new Pen(Color.LightGray);
-                        for (int z = 0; z < 1; z++)
-                        {
-                            if (rand.Next(3) > 1)
-                            {
-                                int one = rand.Next(20) + (20 * r) + xOffset;
-                                int two = rand.Next(20) + (20 * i) + yOffset;
-                                int three = one + (rand.Next(10) - 5);
-                                int four = two + (rand.Next(10) - 5);
-                                if (three < 0)
-                                {
-                                    three = 0;
-                                }
-                                if (four < 0)
-                                {
-                                    four = 0;
-                                }
-                                g.DrawLine(smotherPen, one, two, three, four);
-                                gg.DrawLine(smotherPen, one, two, three, four);
-                            }
-                        }
-                    }
-                    
-                }
-            }
-            
-            f.Update();
-
-            //Thread.Sleep(1000);
-            gg.Dispose();
-            g.Dispose();
-        }
-        /// <summary>
-        /// HelmsDeepFunction is a listner Function that cna be assigned to a button.
-        /// It runs the function <see cref="HelmsDeepButton"/>
-        /// </summary>
-        /// <param name="sender">The object that made the request</param>
-        /// <param name="e">The parameters of the context this function was called</param>
-        public static void HelmsDeepFunction(object sender,EventArgs e)
-        {
-            Button senderButton = (Button)sender;
-            Form1 f = (Form1)senderButton.Parent;
-            HelmsDeepButton(f);
         }
     }
 }

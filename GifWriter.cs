@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Creates a GIF using .Net GIF encoding and additional animation headers.
+/// Stolen from https://stackoverflow.com/a/32810041
 /// </summary>
 public class GifWriter : IDisposable
 {
