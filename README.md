@@ -36,27 +36,16 @@ This is a short C# project designed to replicate a hand-drawn micro .GIF (animat
 26/10/2020 1.0 Release:
 
 WorkerFunctions.DisplayCells -> Modify output pixel-size to 400 so there is no excess canvas.
-
 SiegeFunctions.Directions -> Add enum 'Destroy' so unit can be removed.
-
 WorkerFunctions.SetupAnimation -> Add condition to reove cell if direction is 'destroyed'.
-
 WorkerFunctions.RunAnimation -> Add condition to make cell's direction 'destroy' 1/3 of the time where cell type is 'wounded to enable casulties
-
 WorkerFunctions.FillCells -> Make WallHeight always '8' to make walls straight (Due to customer feedback) 
-
 WorkerFunctions.DisplayCells -> Change ARGB values of walltop,cityproper and bakcgroundcity so they are more visible
-
 WorkerFunctions.DisplayCells -> Randomize 'lighting' change to adjacent ARGB values, to create a 'shimmering' lighting effect
-
 WorkerFunctions.DisplayCells -> Modify condition to add 'static; effect representing infantry, so that is appears on both 'Rohan' and 'Urkahai' ccellTypes
-
 WorkerFunctions.DisplayCells -> Modify wounded draw to increase Cell's 'R' value in it's relevatn brush colour, instead of being pink
-
 WorkerFunctions.HelmsDeepButton -> Add a single draw of 'Help.png' to the side of animation to help readability
-
 SiegeGenerator -> added 'SeigeGen.ico'
-
 SiegeGenerator -> Finish in-code documentation of functions.
 
 
